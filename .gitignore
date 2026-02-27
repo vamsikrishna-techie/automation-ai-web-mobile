@@ -1,0 +1,15 @@
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+mobile-tests/
+test-results/
+.last-run.json
+
+.env
+mobile-tests/.env

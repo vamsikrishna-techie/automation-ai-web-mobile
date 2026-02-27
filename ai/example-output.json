@@ -1,0 +1,31 @@
+{
+  "app": "web",
+  "baseUrl": "https://www.saucedemo.com/",
+  "feature": "Login Feature",
+  "scenarios": [
+    {
+      "name": "Successful login",
+      "needsHuman": false,
+      "steps": [
+        { "action": "goto", "url": "https://www.saucedemo.com/" },
+        { "action": "fill", "testId": "username", "value": "${VALID_USERNAME}" },
+        { "action": "fill", "testId": "password", "value": "${VALID_PASSWORD}" },
+        { "action": "click", "testId": "login-button" },
+        { "action": "assertUrlContains", "contains": "inventory" },
+        { "action": "assertVisible", "testId": "inventory-container" }
+      ]
+    },
+    {
+      "name": "Invalid password",
+      "needsHuman": false,
+      "steps": [
+        { "action": "goto", "url": "https://www.saucedemo.com/" },
+        { "action": "fill", "testId": "username", "value": "${VALID_USERNAME}" },
+        { "action": "fill", "testId": "password", "value": "wrong_password" },
+        { "action": "click", "testId": "login-button" },
+        { "action": "assertVisible", "testId": "error" },
+        { "action": "assertTextContains", "testId": "error", "contains": "Username and password do not match" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "app": "web",
+  "baseUrl": "https://www.saucedemo.com/",
+  "feature": "Checkout Feature",
+  "scenarios": [
+    {
+      "name": "Successful checkout",
+      "needsHuman": false,
+      "steps": [
+        { "action": "goto", "url": "https://www.saucedemo.com/" },
+
+        { "action": "fill", "testId": "username", "value": "${VALID_USERNAME}" },
+        { "action": "fill", "testId": "password", "value": "${VALID_PASSWORD}" },
+        { "action": "click", "testId": "login-button" },
+        { "action": "assertUrlContains", "contains": "inventory" },
+        { "action": "assertVisible", "testId": "inventory-container" },
+
+        { "action": "click", "testId": "add-to-cart-sauce-labs-backpack" },
+        { "action": "click", "testId": "shopping-cart-link" },
+
+        { "action": "assertVisible", "testId": "cart-list" },
+        { "action": "click", "testId": "checkout" },
+
+        { "action": "fill", "testId": "firstName", "value": "${CHECKOUT_FIRSTNAME}" },
+        { "action": "fill", "testId": "lastName", "value": "${CHECKOUT_LASTNAME}" },
+        { "action": "fill", "testId": "postalCode", "value": "${CHECKOUT_POSTAL}" },
+        { "action": "click", "testId": "continue" },
+
+        { "action": "assertUrlContains", "contains": "checkout-step-two" },
+        { "action": "click", "testId": "finish" },
+
+        { "action": "assertVisible", "testId": "checkout-complete-container" },
+        { "action": "assertTextContains", "testId": "complete-header", "contains": "Thank you for your order" }
+      ]
+    }
+  ]
+}
