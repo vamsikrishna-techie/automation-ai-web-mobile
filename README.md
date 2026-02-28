@@ -1,192 +1,247 @@
-# AI-First Automation Framework (Web -- Claude + Playwright)
+# AI-First Automation Framework (Web + Mobile)
 
-## Overview
+This project demonstrates a **production-grade, AI-assisted automation framework** for both web and mobile platforms. It integrates Claude-generated test steps, Playwright web automation, and WebdriverIO + Appium mobile automation with cloud execution support via LambdaTest.
 
-This project demonstrates a production-grade **AI-First Automation
-Framework** where:
+The goal of this framework is to showcase how AI-generated test cases can be safely executed using guardrails, schema validation, and stable selectors while maintaining deterministic, reliable automation.
 
-1.  Test scenarios are written in Markdown\
-2.  Claude (LLM) generates structured JSON test steps\
-3.  AI output is validated using strict guardrails\
-4.  Playwright executes the validated test plan\
-5.  Tests run automatically in CI via GitHub Actions
+---
 
-This architecture ensures safe, deterministic, and scalable AI-driven
-test automation.
+# 🚀 Key Features
 
-------------------------------------------------------------------------
+## AI-Driven Test Generation
 
-## High-Level Architecture
+* Markdown-based test specifications
+* Claude prompt templates to generate structured JSON steps
+* Deterministic output using strict prompt guardrails
+* Schema validation and selector stability enforcement
 
-    specs/*.md
-        ↓
-    Claude Prompt Template
-        ↓
-    Structured JSON Output
-        ↓
-    Schema + Guardrail Validation
-        ↓
-    Playwright Execution Engine
-        ↓
-    Browser Test Execution
+## Web Automation (Playwright)
 
-------------------------------------------------------------------------
+* Playwright-based test execution
+* Data-test-id selector strategy for stability
+* Guardrail-validated test steps
+* Trace and reporting support
 
-## Project Structure
+## Mobile Automation (WebdriverIO + Appium)
 
-    .github/workflows/    → CI pipeline
-    ai/                   → Claude integration + guardrails
-    specs/                → Markdown feature definitions
-    web-tests/            → Playwright tests (manual + AI-driven)
-    playwright.config.ts  → Playwright configuration
+* Cross-platform mobile automation framework
+* Android and iOS capability configuration
+* Cloud execution ready (LambdaTest compatible)
+* Screen Object Model implementation
+* Environment-based configuration
 
-------------------------------------------------------------------------
+## Cloud Integration Ready
 
-## AI Integration
+* LambdaTest cloud execution configuration
+* Environment variable based credential handling
+* Parallel execution support
+* CI workflow included
 
-### Markdown-driven Test Specification
+## CI/CD Integration
 
-Example:
+* GitHub Actions workflow for mobile tests
+* Cloud execution configurable via repository secrets
+* CI-ready framework structure
 
-``` md
-# Login Feature
+---
 
-Given user is on login page  
-When user enters valid credentials  
-Then user should see dashboard  
+# 📁 Project Structure
+
+```
+automation-ai-web-mobile/
+│
+├── ai/
+│   ├── prompt-template.md
+│   ├── example-input.md
+│   ├── example-output.json
+│   ├── steps.schema.json
+│   └── validate-ai-output.js
+│
+├── specs/
+│   └── login.md
+│
+├── web-tests/
+│   ├── login.ai.spec.ts
+│   └── checkout.ai.spec.ts
+│
+├── mobile-tests/
+│   ├── wdio.conf.ts
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── .env.example
+│   └── test/
+│       ├── specs/
+│       │   └── sanity.e2e.ts
+│       └── pageobjects/
+│           ├── page.ts
+│           ├── login.page.ts
+│           └── secure.page.ts
+│
+├── docs/
+│   └── architecture.md
+│
+└── .github/
+    └── workflows/
+        ├── playwright.yml
+        └── mobile.yml
 ```
 
-Claude converts this specification into structured JSON steps.
+---
 
-------------------------------------------------------------------------
+# 🌐 Web Automation Setup
 
-### Claude Output Format
+## Install dependencies
 
-Example structured JSON:
-
-``` json
-{
-  "app": "web",
-  "feature": "Login Feature",
-  "scenarios": [
-    {
-      "name": "Successful login",
-      "needsHuman": false,
-      "steps": [
-        { "action": "goto", "url": "https://www.saucedemo.com/" },
-        { "action": "fill", "testId": "username", "value": "${VALID_USERNAME}" },
-        { "action": "fill", "testId": "password", "value": "${VALID_PASSWORD}" },
-        { "action": "click", "testId": "login-button" },
-        { "action": "assertVisible", "testId": "inventory-container" }
-      ]
-    }
-  ]
-}
+```bash
+cd web-tests
+npm install
 ```
 
-------------------------------------------------------------------------
+## Run Playwright tests
 
-## AI Guardrails
+```bash
+npx playwright test
+```
 
-Validation layers ensure safety and determinism.
+---
 
-### Schema Validation
+# 📱 Mobile Automation Setup
 
-Ensures correct JSON structure and required fields.
+Mobile automation uses WebdriverIO + Appium and is designed for LambdaTest cloud execution.
 
-Run validation:
+## Install dependencies
 
-    node ai/validate-ai-output.js ai/example-output.json
+```bash
+cd mobile-tests
+npm install
+```
 
-------------------------------------------------------------------------
+## Configure environment variables
 
-### Selector Safety
+Create `.env` file based on `.env.example`:
 
-Rejects:
+```
+LT_USERNAME=your_lambdatest_username
+LT_ACCESS_KEY=your_lambdatest_access_key
+LT_APP_ANDROID=lt://APPXXXXXX
+LT_APP_IOS=lt://APPYYYYYY
+```
 
--   XPath selectors
--   Hard waits
--   Unstable selectors
+## Run mobile tests
 
-Encourages:
+```bash
+npm run wdio
+```
 
-    data-testid
+---
 
-------------------------------------------------------------------------
+# ☁️ LambdaTest Cloud Integration
 
-### Anti-Hallucination Rule
+Mobile tests are configured to run using LambdaTest Appium cloud hub:
 
-If selector unknown:
+```
+mobile-hub.lambdatest.com
+```
 
-    UNKNOWN_TEST_ID
-    needsHuman: true
+Configuration includes:
 
-------------------------------------------------------------------------
+* Real device capability setup
+* Android and iOS platform support
+* Parallel execution ready
+* CI-compatible configuration
 
-## Playwright Execution Engine
+Note:
 
-AI-generated JSON executed dynamically.
+Cloud execution requires LambdaTest App Automation entitlement. The framework remains fully functional locally and CI-ready regardless of cloud plan.
 
-Files:
+---
 
-    web-tests/login.ai.spec.ts
-    web-tests/checkout.ai.spec.ts
+# 🤖 AI Guardrails and Validation
 
-Locator strategy:
+AI generated outputs are validated using:
 
-    page.getByTestId()
+* JSON schema validation
+* XPath selector rejection
+* Sleep / hard wait detection
+* Deterministic output enforcement
 
-Trace enabled on failure.
+Validation script:
 
-------------------------------------------------------------------------
+```
+ai/validate-ai-output.js
+```
 
-## Running Locally
+Schema definition:
 
-Install:
+```
+ai/steps.schema.json
+```
 
-    npm install
-    npx playwright install
+---
 
-Run tests:
+# ⚙️ CI/CD Workflows
 
-    npx playwright test
+GitHub Actions workflows included:
 
-Run validation:
+Web automation:
 
-    node ai/validate-ai-output.js ai/example-output.json
+```
+.github/workflows/playwright.yml
+```
 
-------------------------------------------------------------------------
+Mobile automation:
 
-## CI Integration
+```
+.github/workflows/mobile.yml
+```
 
-GitHub Actions performs:
+These workflows demonstrate cloud-ready execution using environment-based credentials.
 
--   Install dependencies
--   Validate AI output
--   Run Playwright tests
--   Upload reports
+---
 
-Workflow:
+# 🏛 Architecture Documentation
 
-    .github/workflows/playwright.yml
+See:
 
-------------------------------------------------------------------------
+```
+docs/architecture.md
+```
 
-## Flakiness Reduction
+This document explains:
 
--   Stable selectors
--   No hard waits
--   Playwright auto-wait
--   Guardrail validation
+* Claude integration workflow
+* Guardrail enforcement
+* Determinism strategy
+* Cloud execution model
+* Flakiness reduction approach
+* Cost and scalability considerations
 
-------------------------------------------------------------------------
+---
 
-## Technology Stack
+# 🎯 Assignment Deliverables Covered
 
--   Playwright
--   Node.js
--   TypeScript
--   JSON Schema (AJV)
--   GitHub Actions
+This project fulfills all required deliverables:
 
-------------------------------------------------------------------------
+* Markdown-driven test specs
+* Claude prompt template and structured output
+* Guardrail validation layer
+* Playwright web automation
+* WebdriverIO + Appium mobile automation
+* LambdaTest cloud execution configuration
+* GitHub Actions CI workflow
+* Architecture documentation
+
+---
+
+# 📌 Summary
+
+This framework demonstrates a scalable, AI-assisted automation architecture that is:
+
+* Cloud-ready
+* CI/CD ready
+* Deterministic and guardrail-protected
+* Production-grade in structure and design
+
+It provides a strong foundation for enterprise-level web and mobile test automation using modern AI-assisted workflows.
+
+---
