@@ -1,0 +1,31 @@
+name: Mobile Tests (LambdaTest)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: |
+          cd mobile-tests
+          npm ci
+
+      - name: Run WDIO (requires LT App Automation entitlement)
+        run: |
+          cd mobile-tests
+          npm run wdio
+        env:
+          LT_USERNAME: ${{ secrets.LT_USERNAME }}
+          LT_ACCESS_KEY: ${{ secrets.LT_ACCESS_KEY }}
+          LT_APP_ANDROID: ${{ secrets.LT_APP_ANDROID }}
+          LT_APP_IOS: ${{ secrets.LT_APP_IOS }}
