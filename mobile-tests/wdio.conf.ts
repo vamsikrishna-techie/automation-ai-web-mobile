@@ -1,3 +1,10 @@
+const RUN_ON = (process.env.RUN_ON || "lambdatest").toLowerCase(); 
+// "local" or "lambdatest"
+
+const isLambdaTest = RUN_ON === "lambdatest";
+const PLATFORM = (process.env.PLATFORM || "android").toLowerCase();
+const isAndroid = PLATFORM === "android";
+
 export const config: WebdriverIO.Config = {
     //
     // ====================
@@ -17,10 +24,10 @@ export const config: WebdriverIO.Config = {
     // according to your user and key information. However, if you are using a private Selenium
     // backend you should define the host address, port, and path here.
     //
-    protocol: 'https',
-    hostname: 'mobile-hub.lambdatest.com',
-    port: 443,
-    path: '/wd/hub',
+    protocol: isLambdaTest ? "https" : "http",
+    hostname: isLambdaTest ? "mobile-hub.lambdatest.com" : "localhost",
+    port: isLambdaTest ? 443 : 4723,
+    path: isLambdaTest ? "/wd/hub" : "/",
     //
     // =================
     // Service Providers
@@ -29,8 +36,8 @@ export const config: WebdriverIO.Config = {
     // should work too though). These services define specific user and key (or access key)
     // values you need to put in here in order to connect to these services.
     //
-    user: process.env.LT_USERNAME,
-    key: process.env.LT_ACCESS_KEY,
+    user: isLambdaTest ? process.env.LT_USERNAME : undefined,
+    key: isLambdaTest ? process.env.LT_ACCESS_KEY : undefined,
     //
     // If you run your tests on Sauce Labs you can specify the region you want to run your tests
     // in via the `region` property. Available short handles for regions are `us` (default) and `eu`.
@@ -79,37 +86,51 @@ export const config: WebdriverIO.Config = {
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://saucelabs.com/platform/platform-configurator
     //
-    capabilities: [
-    {
-        platformName: 'Android',
-        'appium:automationName': 'UiAutomator2',
-        'appium:deviceName': 'Pixel 7',
-        'appium:platformVersion': '13',
-        'appium:app': 'lt://proverbial-android',
+    capabilities: isAndroid
+  ? [
+      {
+        platformName: "Android",
+        "appium:automationName": "UiAutomator2",
+        "appium:deviceName": "Pixel 7",
+        "appium:platformVersion": "13",
+        "appium:app": isLambdaTest
+          ? (process.env.LT_APP_ANDROID || "lt://proverbial-android")
+          : (process.env.LOCAL_APP_ANDROID || "/path/to/app.apk"),
 
-        'lt:options': {
-            build: 'ai-first-mobile-poc',
-            name: 'Android - Login',
-            isRealMobile: true,
-            w3c: true,
-            deviceOrientation: 'portrait'
-        }
-    },
-    {
-        platformName: 'iOS',
-        'appium:automationName': 'XCUITest',
-        'appium:deviceName': 'iPhone 14',
-        'appium:platformVersion': '16',
+        ...(isLambdaTest
+          ? {
+              "lt:options": {
+                build: "ai-first-mobile-poc",
+                name: "Android - Login",
+                isRealMobile: true,
+                w3c: true,
+                deviceOrientation: "portrait"
+              }
+            }
+          : {})
+      }
+    ]
+  : [
+      {
+        platformName: "iOS",
+        "appium:automationName": "XCUITest",
+        "appium:deviceName": "iPhone 14",
+        "appium:platformVersion": "16",
+        "appium:app": isLambdaTest
+          ? (process.env.LT_APP_IOS || "lt://proverbial-ios")
+          : (process.env.LOCAL_APP_IOS || "/path/to/app.app"),
 
-        'appium:app': 'lt://proverbial-ios',
-
-        'lt:options': {
-            build: 'ai-first-mobile-poc',
-            name: 'iOS - Login',
-            isRealMobile: true,
-            w3c: true
-        }
-    }
+        ...(isLambdaTest
+          ? {
+              "lt:options": {
+                build: "ai-first-mobile-poc",
+                name: "iOS - Login",
+                isRealMobile: true,
+                w3c: true
+              }
+            }
+          : {})
+      }
     ],
 
     //
@@ -159,7 +180,9 @@ export const config: WebdriverIO.Config = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    services: [['lambdatest', { tunnel: false }]],
+    services: isLambdaTest
+        ? [["lambdatest", { tunnel: false }]]
+        : [["appium", { args: { address: "127.0.0.1", port: 4723 } }]],
 
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber

@@ -1,6 +1,7 @@
+import { expect } from '@wdio/globals'
+
 describe('Sanity', () => {
-  it('should start a session (requires LT App Automation entitlement)', async () => {
-    const session = await driver.getSession()
-    await expect(session).toHaveProperty('sessionId')
+  it('should start an Appium session', async () => {
+    expect(driver.sessionId).toBeTruthy()
   })
 })
