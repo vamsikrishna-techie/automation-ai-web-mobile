@@ -1,6 +1,7 @@
-import type { Page, Expect } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 
-type Step =
+// TYPES
+export type Step =
   | { action: 'goto'; url: string }
   | { action: 'fill'; testId: string; value: string }
   | { action: 'click'; testId: string }
@@ -8,7 +9,7 @@ type Step =
   | { action: 'assertVisible'; testId: string }
   | { action: 'assertTextContains'; testId: string; contains: string };
 
-type Scenario = {
+export type Scenario = {
   name: string;
   needsHuman: boolean;
   steps: Step[];
@@ -21,29 +22,22 @@ export type AiPlan = {
   scenarios: Scenario[];
 };
 
-// Replace placeholders like ${VALID_USERNAME} with env vars
-function substituteEnv(value: string): string {
+// ENV substitution
+export function substituteEnv(value: string): string {
   const re = /^\$\{([A-Z0-9_]+)\}$/;
   const m = value.match(re);
   if (!m) return value;
 
   const key = m[1];
   const envVal = process.env[key];
-  if (!envVal) {
-    throw new Error(`Missing required env var: ${key} (used in AI step value)`);
-  }
+  if (!envVal) throw new Error(`Missing env var: ${key}`);
   return envVal;
 }
 
-export async function runScenarioFromAiPlan(
-  page: Page,
-  expect: Expect,
-  scenario: Scenario
-) {
+// SCENARIO RUNNER
+export async function runScenario(page: Page, scenario: Scenario) {
   if (scenario.needsHuman) {
-    throw new Error(
-      `Scenario "${scenario.name}" is marked needsHuman=true (UNKNOWN_TEST_ID or incomplete selectors).`
-    );
+    throw new Error(`Scenario "${scenario.name}" needs human review`);
   }
 
   for (const step of scenario.steps) {
@@ -52,11 +46,11 @@ export async function runScenarioFromAiPlan(
         await page.goto(step.url);
         break;
 
-      case 'fill': {
-        const v = substituteEnv(step.value);
-        await page.getByTestId(step.testId).fill(v);
+      case 'fill':
+        await page.getByTestId(step.testId).fill(
+          substituteEnv(step.value)
+        );
         break;
-      }
 
       case 'click':
         await page.getByTestId(step.testId).click();
@@ -67,19 +61,16 @@ export async function runScenarioFromAiPlan(
         break;
 
       case 'assertVisible':
-        await expect(page.getByTestId(step.testId)).toBeVisible();
+        await expect(
+          page.getByTestId(step.testId)
+        ).toBeVisible();
         break;
 
-      case 'assertTextContains': {
-        const loc = page.getByTestId(step.testId);
-        await expect(loc).toContainText(step.contains);
+      case 'assertTextContains':
+        await expect(
+          page.getByTestId(step.testId)
+        ).toContainText(step.contains);
         break;
-      }
-
-      default: {
-        const _exhaustive: never = step;
-        throw new Error(`Unsupported step: ${JSON.stringify(_exhaustive)}`);
-      }
     }
   }
 }
