@@ -28,3 +28,8 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+mobile-tests/apps/
+*.apk
+*.app
+*.ipa

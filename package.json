@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "wdio": "wdio run ./wdio.conf.ts",
+    "wdio:local": "wdio run ./wdio.local.conf.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
